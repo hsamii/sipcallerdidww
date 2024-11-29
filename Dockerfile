@@ -2,20 +2,18 @@ FROM python:3.9-slim
 
 # Install system dependencies including PulseAudio
 RUN apt-get update && apt-get install -y \
-    python3-dev \
-    build-essential \
-    libssl-dev \
-    python3-pip \
-    git \
-    pulseaudio \
-    alsa-utils \
-    libasound2-dev \
-    wget \
-    libpulse-dev \
-    portaudio19-dev \
-    ffmpeg \
-    libavcodec-extra \
-    && rm -rf /var/lib/apt/lists/*
+python3-dev \
+build-essential \
+libssl-dev \
+python3-pip \
+git \
+pulseaudio \
+alsa-utils \
+libasound2-dev \
+libpulse-dev \
+portaudio19-dev \
+ffmpeg \
+libavcodec-extra
 
 # Install Python dependencies
 COPY requirements.txt /tmp/
@@ -23,7 +21,7 @@ RUN pip3 install --no-cache-dir -r /tmp/requirements.txt
 
 # Download and install PJSIP
 WORKDIR /tmp
-RUN wget https://github.com/pjsip/pjproject/archive/refs/tags/2.14.1.tar.gz && \
+RUN wget https://github.com/pjsip/pjproject/archive/refs/tags/2.14.1.tar.gz
     tar -xf 2.14.1.tar.gz && \
     cd pjproject-2.14.1 && \
     export CFLAGS="$CFLAGS -fPIC -DPJMEDIA_AUDIO_DEV_HAS_PORTAUDIO=1" && \
@@ -51,11 +49,12 @@ RUN useradd -m appuser && \
     chown -R appuser:appuser /home/appuser
 
 # Set up PulseAudio configuration
-RUN mkdir -p /etc/pulse
-COPY pulse-client.conf /etc/pulse/client.conf
-RUN mkdir -p /home/appuser/.config/pulse && \
-    cp /etc/pulse/client.conf /home/appuser/.config/pulse/ && \
-    chown -R appuser:appuser /home/appuser/.config
+RUN echo '#!/bin/bash\n\
+echo "Starting PulseAudio in debug mode..."\n\
+pulseaudio --start --log-level=4 --verbose --exit-idle-time=-1\n\
+pactl list short sinks\n\
+' > /home/appuser/app/pulseaudio_debug.sh && \
+    chmod +x /home/appuser/app/pulseaudio_debug.sh
 
 # Set up ALSA configuration for better audio handling
 RUN echo "pcm.!default {\n\
