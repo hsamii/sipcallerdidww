@@ -1,0 +1,21 @@
+version: '3'
+
+services:
+  sip_caller:
+    build: .
+    volumes:
+      - ./recordings:/home/appuser/app/recordings
+      - /tmp/pulseaudio.socket:/tmp/pulseaudio.socket
+      - ${XDG_RUNTIME_DIR}/pulse:/run/user/1000/pulse
+    environment:
+      - TZ=UTC
+      - PULSE_SERVER=unix:/tmp/pulseaudio.socket
+      - PULSE_COOKIE=/tmp/pulseaudio.cookie
+      - PULSE_LATENCY_MSEC=30
+      - ALSA_CARD=0
+    devices:
+      - /dev/snd:/dev/snd
+    network_mode: host  # Важно для SIP-соединений
+    privileged: true
+    group_add:
+      - audio

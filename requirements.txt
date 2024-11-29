@@ -1,0 +1,4 @@
+pydub
+wave==0.0.2
+datetime
+python-dotenv==1.0.0

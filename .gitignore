@@ -1,0 +1,6 @@
+.env
+recordings/
+__pycache__/
+*.pyc
+.env.local
+.env.*.local
